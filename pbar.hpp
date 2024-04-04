@@ -23,6 +23,12 @@
 #include <unistd.h>
 #endif
 
+#if defined(_MSVC_LANG)  // Check if _MSVC_LANG is defined
+#define CPP_VERSION _MSVC_LANG
+#else
+#define CPP_VERSION __cplusplus
+#endif
+
 namespace pbar {
 namespace utils {
 #ifdef _WIN32
@@ -344,7 +350,7 @@ class pbar {
 	// we assume desc_ consists of ascii characters
 	void set_description(const std::string& desc) { desc_ = desc; }
 	void set_description(std::string&& desc) { desc_ = std::move(desc); }
-#if __cplusplus > 201703L  // for C++20
+#if CPP_VERSION > 201703L  // for C++20
 	void set_description(const std::u8string& desc) {
 		desc_ = reinterpret_cast<const char*>(desc.data());
 	}
@@ -440,7 +446,7 @@ class pbar {
 	std::uint64_t ncols_ = 80;
 	std::optional<std::uint64_t> progress_ = std::nullopt;
 	// the following member variables with "char_" suffix must consist of one character
-#if __cplusplus > 201703L  // for C++20
+#if CPP_VERSION > 201703L  // for C++20
 	inline static const std::string done_char_ = reinterpret_cast<const char*>(u8"█");
 #else
 	inline constexpr static auto done_char_ = u8"█";
@@ -496,7 +502,7 @@ class spinner {
 				{
 					std::lock_guard lock(mtx_output_);
 					u8cout_ << '\r';
-#if !defined(_WIN32) && __cplusplus > 201703L  // for C++20
+#if !defined(_WIN32) && CPP_VERSION > 201703L  // for C++20
 					std::u8string spinner_char = spinner_chars_[c];
 					u8cout_ << reinterpret_cast<const char*>(spinner_char.data());
 #else
@@ -515,7 +521,7 @@ class spinner {
 		constexpr auto icon = u8"✔";
 		constexpr auto msg = "SUCCESS";
 		constexpr auto color = term::bright_green;
-#if __cplusplus > 201703L  // for C++20
+#if CPP_VERSION > 201703L  // for C++20
 		print_result(reinterpret_cast<const char*>(icon), msg, color);
 #else
 		print_result(icon, msg, color);
@@ -526,7 +532,7 @@ class spinner {
 		constexpr auto icon = u8"✖";
 		constexpr auto msg = "FAILURE";
 		constexpr auto color = term::bright_red;
-#if __cplusplus > 201703L  // for C++20
+#if CPP_VERSION > 201703L  // for C++20
 		print_result(reinterpret_cast<const char*>(icon), msg, color);
 #else
 		print_result(icon, msg, color);
@@ -614,7 +620,7 @@ class spinner {
 	inline static const std::array<std::string, 4> spinner_chars_ = {{"|", "/", "-", "\\"}};
 	constexpr static std::chrono::milliseconds interval_default = std::chrono::milliseconds(130);
 #else
-#if __cplusplus > 201703L  // for C++20
+#if CPP_VERSION > 201703L  // for C++20
 	inline static const std::array<std::u8string, 10> spinner_chars_ = {
 #else
 	inline static const std::array<std::string, 10> spinner_chars_ = {
